@@ -1047,7 +1047,7 @@ function makeRemovedFSAssert(fsName) {
 
 function makeRemovedRuntimeFunction(name) {
   assert(ASSERTIONS);
-  if (libraryFunctions.includes(name)) {
+  if (librarySymbols.includes(name)) {
     return '';
   }
   return `function ${name}() { abort('\`${name}\` is now a library function and not included by default; add it to your library.js __deps or to DEFAULT_LIBRARY_FUNCS_TO_INCLUDE on the command line'); }`;

@@ -17,8 +17,8 @@ function genArgSequence(n) {
   return args;
 }
 
-// List of functions that were added from the library.
-global.libraryFunctions = [];
+// List of symbols that were added from the library.
+global.librarySymbols = [];
 
 global.LibraryManager = {
   library: {},
