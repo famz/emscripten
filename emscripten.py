@@ -796,6 +796,10 @@ def make_export_wrappers(exports, delay_assignment):
     if name == '__cpp_exception':
       continue
     mangled = asmjs_mangle(name)
+    if mangled in building.user_requested_exports or name.startswith('dynCall_'):
+      lhs = f'{mangled} = Module["{mangled}"]'
+    else:
+      lhs = f'{mangled}'
     # The emscripten stack functions are called very early (by writeStackCookie) before
     # the runtime is initialized so we can't create these wrappers that check for
     # runtimeInitialized.
@@ -805,27 +809,27 @@ def make_export_wrappers(exports, delay_assignment):
       if delay_assignment:
         wrappers.append('''\
 /** @type {function(...*):?} */
-var %(mangled)s = Module["%(mangled)s"] = createExportWrapper("%(name)s");
-''' % {'mangled': mangled, 'name': name})
+var %(lhs)s = createExportWrapper("%(name)s");
+''' % {'lhs': lhs, 'name': name})
       else:
         wrappers.append('''\
 /** @type {function(...*):?} */
-var %(mangled)s = Module["%(mangled)s"] = createExportWrapper("%(name)s", asm);
-''' % {'mangled': mangled, 'name': name})
+var %(lhs)s = createExportWrapper("%(name)s", asm);
+''' % {'lhs': lhs, 'name': name})
     elif delay_assignment:
       # With assertions disabled the wrapper will replace the global var and Module var on
       # first use.
       wrappers.append('''\
 /** @type {function(...*):?} */
-var %(mangled)s = Module["%(mangled)s"] = function() {
-  return (%(mangled)s = Module["%(mangled)s"] = Module["asm"]["%(name)s"]).apply(null, arguments);
+var %(lhs)s = function() {
+  return (%(lhs)s = Module["asm"]["%(name)s"]).apply(null, arguments);
 };
-''' % {'mangled': mangled, 'name': name})
+''' % {'lhs': lhs, 'name': name})
     else:
       wrappers.append('''\
 /** @type {function(...*):?} */
-var %(mangled)s = Module["%(mangled)s"] = asm["%(name)s"]
-''' % {'mangled': mangled, 'name': name})
+var %(lhs)s = asm["%(name)s"]
+''' % {'lhs': lhs, 'name': name})
   return wrappers
 
 
